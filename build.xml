@@ -9,6 +9,24 @@
 <!-- in the project's Project Properties dialog box.-->
 <project name="EZQ" default="default" basedir=".">
     <description>Builds, tests, and runs the project EZQ.</description>
+
+    <property name="src.dir" value="src" />
+    <property name="conf.dir" value="${src.dir}/conf/credentials" />
+    <property name="build.dir" value="build" />
+    <property name="dist.dir" value="dist" />
+
+    <target name="copy-credentials" description="Copy credentials file">
+        <copy todir="${build.dir}">
+            <fileset dir="${conf.dir}">
+                <include name="credentials.properties" />
+            </fileset>
+        </copy>
+    </target>
+
+    <!-- Define your main build target -->
+    <target name="build" depends="copy-credentials"/>
+
+
     <import file="nbproject/build-impl.xml"/>
     <!--
 
