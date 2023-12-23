@@ -16,26 +16,26 @@ import models.UserModel;
  *
  * @author André
  */
-@WebServlet("/login")
-public class LoginServlet extends HttpServlet {
+@WebServlet("/menu")
+public class MenuServlet extends HttpServlet{
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (request.getSession().getAttribute("user") != null) {
-            response.sendRedirect("menu");
+        if (request.getSession().getAttribute("user") == null) {
+            response.sendRedirect("login");
             return;
         }
-         request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request, response);
+        UserModel usr = (UserModel) request.getSession().getAttribute("user");
+        request.setAttribute("courses", usr.getCourses());
+        
+        request.getRequestDispatcher("/WEB-INF/jsp/menu.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String[] splitValueFromInputButton = request.getParameter("course").split(" ");
+        String course = splitValueFromInputButton[splitValueFromInputButton.length - 1];
         
-        String givenEmail = request.getParameter("email");
-        String givenPassword = request.getParameter("password");
-        
-        //VALIDERA UPPGIFTER!!!!!!!!!!
-        request.getSession().setAttribute("user", new UserModel(givenEmail, givenPassword));
-        request.getSession().setAttribute("email", givenEmail);
-        response.sendRedirect("menu");
+        request.getSession().setAttribute("courseName", course);
+        response.sendRedirect("course");
     }
 }
