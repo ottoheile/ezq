@@ -10,6 +10,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import static models.CourseModel.getIdForCourse;
+import models.UserModel;
+import static models.ListModel.getListsForCourse;
 
 /**
  *
@@ -23,7 +26,15 @@ public class CourseServlet extends HttpServlet {
             response.sendRedirect("login");
             return;
         }
-         request.getRequestDispatcher("/WEB-INF/jsp/course.jsp").forward(request, response);
+        if (request.getSession().getAttribute("courseName") == null){
+            response.sendRedirect("menu");
+            return;
+        }
+        
+        UserModel usr = (UserModel) request.getSession().getAttribute("user");
+        request.setAttribute("lists", getListsForCourse(getIdForCourse((String) request.getSession().getAttribute("courseName"), usr)));
+        
+        request.getRequestDispatcher("/WEB-INF/jsp/course.jsp").forward(request, response);
     }
 
 //    @Override

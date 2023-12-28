@@ -24,7 +24,8 @@ public class LoginServlet extends HttpServlet {
             response.sendRedirect("menu");
             return;
         }
-         request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request, response);
+        request.setAttribute("wrongCred", false);
+        request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request, response);
     }
 
     @Override
@@ -33,9 +34,13 @@ public class LoginServlet extends HttpServlet {
         String givenEmail = request.getParameter("email");
         String givenPassword = request.getParameter("password");
         
-        //VALIDERA UPPGIFTER!!!!!!!!!!
-        request.getSession().setAttribute("user", new UserModel(givenEmail, givenPassword));
-        request.getSession().setAttribute("email", givenEmail);
-        response.sendRedirect("menu");
+        if (UserModel.isValidCredentials(givenEmail, givenPassword)) {
+            request.getSession().setAttribute("user", new UserModel(givenEmail, givenPassword));
+            request.getSession().setAttribute("email", givenEmail);
+            response.sendRedirect("menu");
+        } else {
+            request.setAttribute("wrongCred", true);
+            request.getRequestDispatcher("/WEB-INF/jsp/login.jsp").forward(request, response);
+        }
     }
 }

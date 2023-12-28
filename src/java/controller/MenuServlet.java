@@ -5,12 +5,15 @@
 package controller;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import models.UserModel;
+import static models.CourseModel.createNewCourse;
+
 
 /**
  *
@@ -25,7 +28,8 @@ public class MenuServlet extends HttpServlet{
             return;
         }
         UserModel usr = (UserModel) request.getSession().getAttribute("user");
-        request.setAttribute("courses", usr.getCourses());
+        request.setAttribute("courses", usr.getAssignedCourses());
+        request.getSession().setAttribute("admin", usr.isAdmin());
         
         request.getRequestDispatcher("/WEB-INF/jsp/menu.jsp").forward(request, response);
     }
@@ -36,6 +40,18 @@ public class MenuServlet extends HttpServlet{
         String course = splitValueFromInputButton[splitValueFromInputButton.length - 1];
         
         request.getSession().setAttribute("courseName", course);
-        response.sendRedirect("course");
+        if (course.equals("Add")){
+            UserModel usr = (UserModel) request.getSession().getAttribute("user");
+            String newCourseTitel = request.getParameter("titel");
+            createNewCourse(newCourseTitel, usr.getId());
+            response.sendRedirect("menu");
+        }
+        else if (course.equals("LogOut")){
+            request.getSession().invalidate();
+            response.sendRedirect("login");
+        }
+        else{
+            response.sendRedirect("course");
+        }
     }
 }

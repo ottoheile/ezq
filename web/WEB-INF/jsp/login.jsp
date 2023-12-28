@@ -11,17 +11,22 @@
         <title>Login</title>
         <style>
             body{
-                background-image: url("https://i.pinimg.com/originals/88/15/63/881563d6444b370fa4ceea0c3183bb4c.gif");
-                background-repeat: no-repeat;
-                background-size: cover;
-                color: white;
+                background-color: lightgrey;
+            }
+            div{
+                background-color: white;
+                width: 50%;
+                margin-left: auto;
+                margin-right: auto;
+                border-radius: 10px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+                padding-bottom: 50px;
             }
             form {
                 margin-left: auto;
                 margin-right: auto;
                 width: 20%;
                 text-align: center;
-                border: solid;
             }
             form input{
                 margin-bottom: 20px;
@@ -32,17 +37,25 @@
                 margin-right: auto;
                 text-align: center;
             }
+            #button {
+                border: solid 1px; /* Add a border for better visibility */
+                border-radius: 10px 1px;
+                padding: 5px;
+            }
         </style>
     </head>
     <body>
         <div>
-            <h1 id="title">Log in to your account!</h1>
+            <h1 id="title">Login</h1>
             <form action="login" method="post">
+                <% if ((boolean) request.getAttribute("wrongCred")) {%>
+                <label> Wrong credentials</label><br><br>
+                <% } %>
                 <label>Email</label><br>
                 <input type="email" id="email" name="email" required><br>
                 <label>Password</label><br>
                 <input type="password" id="password" name="password" required><br>
-                <input type="submit" value="Create account/Log in">
+                <input id="button" type="submit" value="Login">
             </form>
         </div>
     </body>

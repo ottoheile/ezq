@@ -4,6 +4,9 @@
  */
 package models;
 
+import util.DBHandler.QueryResult;
+import static util.DBHandler.runQuery;
+
 /**
  *
  * @author André
@@ -19,4 +22,26 @@ public class CourseModel {
         return name;
     }
     
+    public static int getIdForCourse(String courseName, UserModel user){
+        QueryResult qr;
+        if (user.isAdmin()){
+            qr = runQuery("SELECT ID FROM EZQ.COURSES WHERE TITEL = ? AND ADMIN_ID = ?", courseName, String.valueOf(user.getId()));
+            return (int) qr.getRow(0)[0];
+        }
+        else {
+            qr = runQuery("SELECT COURSE_ID FROM EZQ.COURSE_USER WHERE USER_ID = ?", String.valueOf(user.getId()));
+            for (int i = 0; i < qr.getNumberOfRows(); i++){
+                Object[] row = qr.getRow(i);
+                QueryResult tempQr = runQuery("SELECT ID FROM EZQ.COURSES WHERE ID = ? AND TITEL = ?", String.valueOf((int)row[0]), courseName);
+                if (!tempQr.isEmpty()){
+                    return (int) tempQr.getRow(0)[0];
+                }
+            }
+        } 
+        return -1;
+    }
+    
+    public static void createNewCourse(String titel, int admin_id){
+        QueryResult qr = runQuery("INSERT INTO EZQ.COURSES (titel, admin_id) VALUES (?, ?)", titel, String.valueOf(admin_id));
+    }
 }
