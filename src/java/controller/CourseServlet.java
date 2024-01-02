@@ -13,6 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 import static models.CourseModel.getIdForCourse;
 import models.UserModel;
 import static models.ListModel.getListsForCourse;
+import static models.ListModel.addListToCourse;
+import static models.ListModel.deleteList;
 
 /**
  *
@@ -37,15 +39,27 @@ public class CourseServlet extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/jsp/course.jsp").forward(request, response);
     }
 
-//    @Override
-//    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        
-//        String givenEmail = request.getParameter("email");
-//        String givenPassword = request.getParameter("password");
-//        
-//        //VALIDERA UPPGIFTER!!!!!!!!!!
-//        request.getSession().setAttribute("user", new UserModel(givenEmail, givenPassword));
-//        request.getSession().setAttribute("email", givenEmail);
-//        response.sendRedirect("menu");
-//    }
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        UserModel usr = (UserModel) request.getSession().getAttribute("user");
+        String[] splitValueFromInputButton = request.getParameter("list").split(" ");
+        String eventName = splitValueFromInputButton[splitValueFromInputButton.length - 1];
+        
+        if (eventName.equals("Add")){
+            int max_slots = Integer.parseInt(request.getParameter("maxslots"));
+            int duration = Integer.parseInt(request.getParameter("duration"));
+            String location = request.getParameter("location");
+            String description = request.getParameter("description");
+            String datetime = request.getParameter("datetime").replace("T0", " ");
+            String currentCourse = (String) request.getSession().getAttribute("courseName");
+            
+            addListToCourse(max_slots, duration, datetime, location, description, getIdForCourse(currentCourse, usr), usr.getId());
+            response.sendRedirect("course");
+        }
+        else if (eventName.equals("Delete")){
+            deleteList(Integer.parseInt(splitValueFromInputButton[0]));
+            response.sendRedirect("course");
+        }
+        
+    }
 }
