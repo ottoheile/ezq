@@ -34,17 +34,12 @@
             margin: 0 auto;
         }
         .item {
-            height: 100px; /* Set the height as needed */
             border: solid 1px; /* Add a border for better visibility */
             text-align: center;
             border-radius: 20px 1px;
             margin-left: 15px;
             margin-right: 15px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-        }
-        .item form{
-            height: 100%;
-            padding: 10px;
         }
         .item form input{
             margin-top: 20px;
@@ -57,7 +52,7 @@
             background-color: rgba(230,230,230);
         }
         .item button{
-            margin-top: 20px;
+            margin-bottom: 5px;
             border-radius: 10px 1px;
         }
         #popup {
@@ -77,7 +72,7 @@
             position: absolute;
             right: 20px;
         }
-        #popup #titel{
+        #popup #title{
             margin-bottom: 10px;
         }
         #logout {
@@ -106,6 +101,13 @@
                         <label><%= courses[i].getName() %> </label><br>
                         <input type="submit" name="course" value="Show available lists for <%= courses[i].getName() %>">
                     </form>
+                    <% if ((boolean) request.getSession().getAttribute("admin")) { %>
+                    <form action="menu" method="post" id="deleteForm">
+                        <br>
+                        <input type="hidden" name="course" value="<%= courses[i].getName() %> Delete">
+                        <button type="button" onclick="confirmDelete()">Delete</button>
+                    </form>
+                    <% } %>
                 </div>
             <% } %>
             <% if ((boolean) request.getSession().getAttribute("admin")) { %>
@@ -126,8 +128,8 @@
                 <h2>Add Course</h2>
                 <form id="popupForm" action="menu" method="post">
                   <!-- Your input fields go here -->
-                  <label for="inputField">Titel:</label>
-                  <input type="text" id="titel" name="titel" required><br>
+                  <label for="inputField">Title:</label>
+                  <input type="text" id="title" name="title" required><br>
                   <input type="submit" id="add" name="course" value="Add">
                   <button onclick="closePopup()">Close</button>
                 </form>
@@ -135,7 +137,8 @@
         </div>
 
         <form  id="logoutForm" action="menu" method="post">
-            <input id="logout" type="submit" name="course" value="LogOut">
+            <input id="logout" type="hidden" name="course" value="LogOut">
+            <button id="logout" type="button" onclick="confirmLogOut()">Log out</button>
         </form>
         <script>
             // Function to show the popup
@@ -154,6 +157,26 @@
               alert('Form submitted successfully!');
               closePopup(); // Close the popup after processing
             }
+            function confirmLogOut() {
+                // Display a confirmation dialog
+                var isConfirmed = confirm("Are you sure you want to log out?");
+
+                // If the user confirms, submit the form
+                if (isConfirmed) {
+                    var form = document.getElementById('logoutForm');
+                    form.submit();
+                }
+            }
+            function confirmDelete() {
+                // Display a confirmation dialog
+                var isConfirmed = confirm("Are you sure you want to delete this course?");
+                // If the user confirms, submit the form
+                if (isConfirmed) {
+                    var form = document.getElementById('deleteForm');
+                    form.submit();
+                }
+            }
+
          </script>
     </body>
 </html>

@@ -32,7 +32,7 @@ public class ListModel {
     }
 
     public String getStartTime() {
-        return startTime;
+        return startTime.replace(":00.0", "");
     }
 
     public String getDescription() {
@@ -51,6 +51,10 @@ public class ListModel {
         return max_slots;
     }
     
+    public int getId(){
+        return id;
+    }
+    
     public int slotsLeft(){
         QueryResult qr = runQuery("SELECT * FROM EZQ.RESERVATIONS WHERE LIST_ID = ?", String.valueOf(id));
         
@@ -66,6 +70,30 @@ public class ListModel {
             lists[i] = new ListModel(row[0].toString(),(String) row[1],(String) row[2],(int) row[3],(int) row[4], (int) row[5]);
         }
         return lists;
+    }
+    
+    private static void deleteListFromReservations(int list_id){
+        runQuery("DELETE FROM EZQ.RESERVATIONS WHERE LIST_ID = ?", String.valueOf(list_id));
+    }
+    
+    public static void deleteList(int list_id){
+        runQuery("DELETE FROM EZQ.LISTS WHERE ID = ?", String.valueOf(list_id));
+        deleteListFromReservations(list_id);
+    }
+    
+    public static void deleteAllListsForCourse(int course_id ){
+        QueryResult qr = runQuery("SELECT ID FROM EZQ.LISTS WHERE COURSE_ID = ?", String.valueOf(course_id));
+        runQuery("DELETE FROM EZQ.LISTS WHERE COURSE_ID = ?", String.valueOf(course_id));
+        for (int i = 0; i < qr.getNumberOfRows(); i++){
+            deleteListFromReservations((int) qr.getRow(i)[0]);
+        }
+    }
+    
+    public static void addListToCourse (int max_slots, int interval, String datetime, String location, String desc, int course_id, int user_id){
+        datetime = datetime + ":00";
+        runQuery("INSERT INTO EZQ.LISTS (COURSE_ID, USER_ID, DESCRIPTION, LOCATION, START, INTERVAL, MAX_SLOTS)"
+                + " VALUES (?, ?, ?, ?, ?, ?, ?)", String.valueOf(course_id), String.valueOf(user_id), desc, location, 
+                datetime, String.valueOf(interval), String.valueOf(max_slots));
     }
     
 }

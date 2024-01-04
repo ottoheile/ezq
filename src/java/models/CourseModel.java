@@ -6,6 +6,7 @@ package models;
 
 import util.DBHandler.QueryResult;
 import static util.DBHandler.runQuery;
+import static models.ListModel.deleteAllListsForCourse;
 
 /**
  *
@@ -42,6 +43,11 @@ public class CourseModel {
     }
     
     public static void createNewCourse(String titel, int admin_id){
-        QueryResult qr = runQuery("INSERT INTO EZQ.COURSES (titel, admin_id) VALUES (?, ?)", titel, String.valueOf(admin_id));
+        runQuery("INSERT INTO EZQ.COURSES (titel, admin_id) VALUES (?, ?)", titel, String.valueOf(admin_id));
+    }
+    
+    public static void deleteCourse(String titel, UserModel user){
+        deleteAllListsForCourse(getIdForCourse(titel, user));
+        runQuery("DELETE FROM EZQ.COURSES WHERE TITEL = ? AND ADMIN_ID = ?", titel, String.valueOf(user.getId()));
     }
 }
