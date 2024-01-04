@@ -50,7 +50,8 @@ public class CourseServlet extends HttpServlet {
             int duration = Integer.parseInt(request.getParameter("duration"));
             String location = request.getParameter("location");
             String description = request.getParameter("description");
-            String datetime = request.getParameter("datetime").replace("T0", " ");
+            String datetime = request.getParameter("datetime");
+            datetime = datetime.contains("T0") ? datetime.replace("T0", " ") : datetime.replace("T", " ");
             String currentCourse = (String) request.getSession().getAttribute("courseName");
             
             addListToCourse(max_slots, duration, datetime, location, description, getIdForCourse(currentCourse, usr), usr.getId());
