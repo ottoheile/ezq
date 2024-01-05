@@ -1,7 +1,7 @@
 <%-- 
     Document   : course
     Created on : 23 Dec 2023, 23:11:18
-    Author     : André
+    Author     : André, Otto
 --%>
 
 <%@ page import="models.ListModel" %>
@@ -112,14 +112,27 @@
     <div class="container">
         <% ListModel[] lists = ((ListModel[]) request.getAttribute("lists"));
         for (int i = 0; i < lists.length; i++) { %>
-            <% if (!(lists[i].slotsLeft() == 0)) { %>
+            <% if ((lists[i].slotsLeft() > 0) || (boolean) request.getSession().getAttribute("admin")) { %>
                 <div class="item">
-                    <form action="course" method="post">
+                    <form action="course" method="post" id="bookingForm<%=i%>">
                         <label><%= lists[i].getStartTime() %> </label><br>
                         <p><%= lists[i].getDescription() %></p>
                         <p>Location: <%= lists[i].getLocation() %></p>
                         <p>Slots left: <%= lists[i].slotsLeft() %></p>
-                        <input type="submit" name="list" value="Book <%= lists[i].getStartTime() %>">
+                        <% if ((boolean) request.getSession().getAttribute("admin")) { %>
+                            <% if (((boolean[]) request.getAttribute("userNotExistsTextHelper"))[i]) { %>
+                                <p>User does not exist.</p>
+                            <% } %>
+                            <label for="inputField">User email:</label>
+                            <input type="text" id="userBooked" name="userBooked<%=i%>">
+                        <% } %>
+                        <input type="hidden" name="list" value="<%= lists[i].getId() %> Book">
+                        <% if (lists[i].slotsLeft() > 0) { %>
+                            <button type="submit">Book</button>
+                        <% } else { %>
+                            <button disabled>Book</button>
+                        <% } %>
+                        <input type="hidden" name="formIndex" value="<%=i%>"/>
                     </form>
                     <% if ((boolean) request.getSession().getAttribute("admin")) { %>
                     <form action="course" method="post" id="deleteForm">
@@ -156,7 +169,7 @@
                   <button onclick="closePopup()">Close</button>
                 </form>
         </div>
-    </div>
+        </div>
     <button id="goback"> Go back </button>
     <script>
         document.getElementById('goback').addEventListener('click', function() {

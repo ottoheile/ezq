@@ -11,14 +11,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import static models.CourseModel.getIdForCourse;
+import models.ListModel;
 import models.UserModel;
+import static models.UserModel.exists;
+import static models.UserModel.getIDFromEmail;
+import static models.ListModel.addUserToList;
 import static models.ListModel.getListsForCourse;
 import static models.ListModel.addListToCourse;
 import static models.ListModel.deleteList;
 
 /**
  *
- * @author André
+ * @author André, Otto
  */
 @WebServlet("/course")
 public class CourseServlet extends HttpServlet {
@@ -34,7 +38,10 @@ public class CourseServlet extends HttpServlet {
         }
         
         UserModel usr = (UserModel) request.getSession().getAttribute("user");
-        request.setAttribute("lists", getListsForCourse(getIdForCourse((String) request.getSession().getAttribute("courseName"), usr)));
+        ListModel[] lists = getListsForCourse(getIdForCourse((String) request.getSession().getAttribute("courseName"), usr));
+        
+        request.setAttribute("lists", lists);
+        request.setAttribute("userNotExistsTextHelper", new boolean[lists.length]);
         
         request.getRequestDispatcher("/WEB-INF/jsp/course.jsp").forward(request, response);
     }
@@ -44,7 +51,7 @@ public class CourseServlet extends HttpServlet {
         UserModel usr = (UserModel) request.getSession().getAttribute("user");
         String[] splitValueFromInputButton = request.getParameter("list").split(" ");
         String eventName = splitValueFromInputButton[splitValueFromInputButton.length - 1];
-        
+                
         if (eventName.equals("Add")){
             int max_slots = Integer.parseInt(request.getParameter("maxslots"));
             int duration = Integer.parseInt(request.getParameter("duration"));
@@ -61,6 +68,28 @@ public class CourseServlet extends HttpServlet {
             deleteList(Integer.parseInt(splitValueFromInputButton[0]));
             response.sendRedirect("course");
         }
-        
+        else if (eventName.equals("Book")) {
+            int userID = usr.getId();
+            int formIndex = Integer.parseInt(request.getParameter("formIndex"));
+            
+            if (usr.isAdmin()) {
+                String user = request.getParameter("userBooked" + formIndex);
+                if (!exists(user)) {
+                    ListModel[] lists = getListsForCourse(getIdForCourse((String) request.getSession().getAttribute("courseName"), usr));
+                    boolean[] userNotExistsTextHelper = new boolean[lists.length];
+                    userNotExistsTextHelper[formIndex] = true;
+                    
+                    request.setAttribute("userNotExistsTextHelper", userNotExistsTextHelper);
+                    request.setAttribute("lists", lists);
+                    request.getRequestDispatcher("/WEB-INF/jsp/course.jsp").forward(request, response);
+                    
+                    return;
+                }
+                userID = getIDFromEmail(user);
+            }
+            addUserToList(userID, Integer.parseInt(splitValueFromInputButton[0]));
+            response.sendRedirect("course");
+        }
+        //TODO: Allow admin to remove user from list
     }
 }

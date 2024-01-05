@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 /**
  *
- * @author André
+ * @author André, Otto
  */
 public class ListModel {
     
@@ -96,4 +96,9 @@ public class ListModel {
                 datetime, String.valueOf(interval), String.valueOf(max_slots));
     }
     
+    public static void addUserToList(int userID, int listID) {
+        if (runQuery("SELECT * FROM EZQ.RESERVATIONS WHERE USER_ID = ? AND LIST_ID = ?", String.valueOf(userID), String.valueOf(listID)).isEmpty()) {
+            runQuery("INSERT INTO EZQ.RESERVATIONS (LIST_ID, USER_ID) VALUES (?, ?)", String.valueOf(listID), String.valueOf(userID));
+        }
+    }
 }
