@@ -111,4 +111,18 @@ public class ListModel {
             runQuery("DELETE FROM EZQ.RESERVATIONS WHERE USER_ID = ? AND LIST_ID = ?", String.valueOf(userID), String.valueOf(listID));
         }
     }
+    
+    public static ListModel[] getAllBookedListsForUserOrderedByCourseName(int userID) {
+        QueryResult queryResult = runQuery("SELECT L.START, L.DESCRIPTION, L.LOCATION, L.INTERVAL, L.MAX_SLOTS, L.ID FROM EZQ.LISTS AS L " +
+                                           "INNER JOIN EZQ.RESERVATIONS AS R ON R.LIST_ID = L.ID INNER JOIN EZQ.COURSES AS C ON C.ID = L.COURSE_ID " +
+                                           "WHERE R.USER_ID = ? ORDER BY C.TITEL, L.ID", String.valueOf(userID));
+        int numberOfRows = queryResult.getNumberOfRows();
+        ListModel[] reservations = new ListModel[numberOfRows];
+        
+        for (int i = 0; i < numberOfRows; i++) {
+            Object[] row = queryResult.getRow(i);
+            reservations[i] = new ListModel(row[0].toString(), (String) row[1], (String) row[2], (int) row[3], (int) row[4], (int) row[5]);
+        }
+        return reservations;
+    }
 }
