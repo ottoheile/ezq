@@ -4,7 +4,7 @@
     Author     : André, Otto
 --%>
 
-<%@ page import="models.ListModel" %>
+<%@ page import="models.ListModel, models.UserModel" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -111,26 +111,34 @@
     
     <div class="container">
         <% ListModel[] lists = ((ListModel[]) request.getAttribute("lists"));
-        for (int i = 0; i < lists.length; i++) { %>
-            <% if ((lists[i].slotsLeft() > 0) || (boolean) request.getSession().getAttribute("admin")) { %>
+        UserModel user = (UserModel) request.getSession().getAttribute("user");
+        boolean isAdmin = (boolean) request.getSession().getAttribute("admin");
+        
+        for (int i = 0; i < lists.length; i++) {
+            boolean userHasBooking = lists[i].userHasBookedList(user.getId(), lists[i].getId());
+            if ((lists[i].slotsLeft() > 0) || userHasBooking || isAdmin) { %>
                 <div class="item">
                     <form action="course" method="post" id="bookingForm<%=i%>">
                         <label><%= lists[i].getStartTime() %> </label><br>
                         <p><%= lists[i].getDescription() %></p>
                         <p>Location: <%= lists[i].getLocation() %></p>
                         <p>Slots left: <%= lists[i].slotsLeft() %></p>
-                        <% if ((boolean) request.getSession().getAttribute("admin")) { %>
+                        <% if (isAdmin) { %>
                             <% if (((boolean[]) request.getAttribute("userNotExistsTextHelper"))[i]) { %>
                                 <p>User does not exist.</p>
                             <% } %>
                             <label for="inputField">User email:</label>
                             <input type="text" id="userBooked" name="userBooked<%=i%>">
                         <% } %>
-                        <input type="hidden" name="list" value="<%= lists[i].getId() %> Book">
-                        <% if (lists[i].slotsLeft() > 0) { %>
-                            <button type="submit">Book</button>
+                        <input type="hidden" name="list" value="<%= lists[i].getId() %> <%= userHasBooking && !isAdmin ? "Cancel" : "Book" %>">
+                        <% if (!userHasBooking || isAdmin) { %>
+                            <% if (lists[i].slotsLeft() > 0) { %>
+                                <button type="submit">Book slot</button>
+                            <% } else { %>
+                                <button disabled>Book slot</button>
+                            <% } %>
                         <% } else { %>
-                            <button disabled>Book</button>
+                            <button type="submit">Cancel reservation</button>
                         <% } %>
                         <input type="hidden" name="formIndex" value="<%=i%>"/>
                     </form>

@@ -96,9 +96,19 @@ public class ListModel {
                 datetime, String.valueOf(interval), String.valueOf(max_slots));
     }
     
+    public static boolean userHasBookedList(int userID, int listID) {
+        return !runQuery("SELECT * FROM EZQ.RESERVATIONS WHERE USER_ID = ? AND LIST_ID = ?", String.valueOf(userID), String.valueOf(listID)).isEmpty();
+    }
+    
     public static void addUserToList(int userID, int listID) {
-        if (runQuery("SELECT * FROM EZQ.RESERVATIONS WHERE USER_ID = ? AND LIST_ID = ?", String.valueOf(userID), String.valueOf(listID)).isEmpty()) {
+        if (!userHasBookedList(userID, listID)) {
             runQuery("INSERT INTO EZQ.RESERVATIONS (LIST_ID, USER_ID) VALUES (?, ?)", String.valueOf(listID), String.valueOf(userID));
+        }
+    }
+    
+    public static void removeUserFromList(int userID, int listID) {
+        if (userHasBookedList(userID, listID)) {
+            runQuery("DELETE FROM EZQ.RESERVATIONS WHERE USER_ID = ? AND LIST_ID = ?", String.valueOf(userID), String.valueOf(listID));
         }
     }
 }

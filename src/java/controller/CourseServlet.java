@@ -19,6 +19,7 @@ import static models.ListModel.addUserToList;
 import static models.ListModel.getListsForCourse;
 import static models.ListModel.addListToCourse;
 import static models.ListModel.deleteList;
+import static models.ListModel.removeUserFromList;
 
 /**
  *
@@ -90,6 +91,12 @@ public class CourseServlet extends HttpServlet {
             addUserToList(userID, Integer.parseInt(splitValueFromInputButton[0]));
             response.sendRedirect("course");
         }
-        //TODO: Allow admin to remove user from list
+        else if (eventName.equals("Cancel")) {
+            int userID = usr.getId();
+            int formIndex = Integer.parseInt(request.getParameter("formIndex"));
+            
+            removeUserFromList(userID, Integer.parseInt(splitValueFromInputButton[0]));
+            response.sendRedirect("course");
+        }
     }
 }
