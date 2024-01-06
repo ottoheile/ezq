@@ -30,7 +30,6 @@
             margin-left: auto;
             margin-right: auto;
             text-align: center;
-            margin-bottom: 50px;
             font-family: cursive;
         }
         .container {
@@ -48,6 +47,7 @@
             padding: 8px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
             font-size: 12px;
+            margin-top: 30px;
         }
         .item form input{
             margin-top: 20px;
@@ -104,10 +104,51 @@
             width: 100%;
             box-sizing: border-box;
         }
+        #addUser{
+            text-align: right;
+            margin-right: 20px;
+            margin-bottom: 20px;
+        }
+        #addUser input{
+            border-radius: 10px 1px;
+        }
+        
+        #popupAdd {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            border-radius: 10px 1px;
+        }
+        #popupAdd form button{
+            margin-top: 10px;
+            position: absolute;
+            right: 20px;
+        }
+        #popupAdd form #submitInputAddUser{
+            margin-top: 10px;
+        }
+        #popupAdd #title{
+            margin-bottom: 10px;
+        }
+        #addUserButton{
+            position: absolute;
+            right: 15px;
+            border-radius: 10px 1px;
+        }
     </style>
 </head>
 <body>
     <h2> Course <%= (String) request.getSession().getAttribute("courseName")%></h2>
+    <% if ((boolean) request.getSession().getAttribute("admin")) { %>
+    <button id="addUserButton" onclick="showPopupAdd()">Add user</button>
+    <% } %>
     
     <div class="container">
         <% ListModel[] lists = ((ListModel[]) request.getAttribute("lists"));
@@ -156,6 +197,16 @@
                   <button onclick="closePopup()">Close</button>
                 </form>
         </div>
+        <div id="popupAdd">
+            <h2>Add User</h2>
+            <form action="course" method="post">
+              <!-- Your input fields go here -->
+              <label for="inputField">Username/email:</label>
+              <input type="text" name="username" required><br>
+              <input type="submit" id="submitInputAddUser" name="list" value="Add user">
+              <button onclick="closePopupAdd()">Close</button>
+            </form>
+        </div>
     </div>
     <button id="goback"> Go back </button>
     <script>
@@ -181,12 +232,22 @@
         function closePopup() {
           document.getElementById('popup').style.display = 'none';
         }
+        
+        function showPopupAdd() {
+          document.getElementById('popupAdd').style.display = 'block';
+        }
+
+        // Function to close the popup
+        function closePopupAdd() {
+          document.getElementById('popupAdd').style.display = 'none';
+        }
 
         // Function to handle confirmation (you can modify this based on your needs)
         function confirmPopup() {
           // Add your logic here to handle form data or perform any other actions
           alert('Form submitted successfully!');
           closePopup(); // Close the popup after processing
+          closePopupAdd();
         }
         function confirmDelete() {
                 // Display a confirmation dialog

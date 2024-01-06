@@ -15,6 +15,8 @@ import models.UserModel;
 import static models.ListModel.getListsForCourse;
 import static models.ListModel.addListToCourse;
 import static models.ListModel.deleteList;
+import static models.CourseModel.addUserToCourse;
+import static models.UserModel.getIdFromUsername;
 
 /**
  *
@@ -59,6 +61,17 @@ public class CourseServlet extends HttpServlet {
         else if (eventName.equals("Delete")){
             deleteList(Integer.parseInt(splitValueFromInputButton[0]));
             response.sendRedirect("course");
+        }
+        else if(eventName.equals("user")){
+            String userToAdd = request.getParameter("username");
+            int userToAddId = getIdFromUsername(userToAdd);
+            if (userToAddId == -1){
+                response.sendRedirect("course");
+            }
+            else{
+                addUserToCourse((String) request.getSession().getAttribute("courseName"), usr.getId(), userToAddId);
+                response.sendRedirect("course");
+            }
         }
         
     }

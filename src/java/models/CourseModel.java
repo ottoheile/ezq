@@ -43,11 +43,26 @@ public class CourseModel {
     }
     
     public static void createNewCourse(String titel, int admin_id){
+        QueryResult qr = runQuery("SELECT ID FROM EZQ.COURSES WHERE TITEL = ? AND ADMIN_ID = ?", titel, String.valueOf(admin_id));
+        if (!qr.isEmpty())
+            return;
         runQuery("INSERT INTO EZQ.COURSES (titel, admin_id) VALUES (?, ?)", titel, String.valueOf(admin_id));
     }
     
     public static void deleteCourse(String titel, UserModel user){
         deleteAllListsForCourse(getIdForCourse(titel, user));
+        int course_id = getIdForCourse(titel, user);
+        runQuery("DELETE FROM EZQ.COURSE_USER WHERE COURSE_ID = ?", String.valueOf(course_id));
         runQuery("DELETE FROM EZQ.COURSES WHERE TITEL = ? AND ADMIN_ID = ?", titel, String.valueOf(user.getId()));
+    }
+    
+    public static void addUserToCourse(String titel, int admin_id, int user_id){
+        QueryResult qr = runQuery("SELECT ID FROM EZQ.COURSES WHERE TITEL = ? AND ADMIN_ID = ?", titel, String.valueOf(admin_id));
+        Object[] row = qr.getRow(0);
+        int course_id = (int) row[0];
+        
+        QueryResult qrTemp = runQuery("SELECT ID FROM EZQ.COURSE_USER WHERE COURSE_ID = ? AND USER_ID= ?", String.valueOf(course_id), String.valueOf(user_id));
+        if(qrTemp.isEmpty())
+            runQuery("INSERT INTO EZQ.COURSE_USER (course_id, user_id) VALUES (?, ?)", String.valueOf(course_id), String.valueOf(user_id));
     }
 }

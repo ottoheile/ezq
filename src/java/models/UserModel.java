@@ -62,4 +62,12 @@ public class UserModel {
         
         return courses;
     }
+    
+    public static int getIdFromUsername(String username){
+        QueryResult qr = runQuery("SELECT ID FROM EZQ.USERS WHERE EMAIL = ?", username);
+        if (qr.isEmpty()){
+            return -1;
+        }
+        return (int) qr.getRow(0)[0];
+    }
 }

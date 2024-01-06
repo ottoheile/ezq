@@ -44,6 +44,7 @@
         .item form input{
             margin-top: 20px;
             border-radius: 10px 1px;
+            margin-bottom: 10px;
         }
         .item form input:active{
             background-color: rgba(230,230,230);
@@ -102,10 +103,10 @@
                         <input type="submit" name="course" value="Show available lists for <%= courses[i].getName() %>">
                     </form>
                     <% if ((boolean) request.getSession().getAttribute("admin")) { %>
-                    <form action="menu" method="post" id="deleteForm">
+                    <form action="menu" method="post" id="deleteForm<%= courses[i].getName() %>">
                         <br>
                         <input type="hidden" name="course" value="<%= courses[i].getName() %> Delete">
-                        <button type="button" onclick="confirmDelete()">Delete</button>
+                        <button type="button" onclick="confirmDelete('<%= courses[i].getName() %>')">Delete</button>
                     </form>
                     <% } %>
                 </div>
@@ -167,12 +168,13 @@
                     form.submit();
                 }
             }
-            function confirmDelete() {
+            function confirmDelete(courseName) {
                 // Display a confirmation dialog
                 var isConfirmed = confirm("Are you sure you want to delete this course?");
                 // If the user confirms, submit the form
                 if (isConfirmed) {
-                    var form = document.getElementById('deleteForm');
+                    var deleteform = 'deleteForm' + courseName;
+                    var form = document.getElementById(deleteform);
                     form.submit();
                 }
             }
