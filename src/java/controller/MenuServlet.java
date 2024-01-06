@@ -17,7 +17,7 @@ import static models.CourseModel.deleteCourse;
 
 /**
  *
- * @author André
+ * @author André, Otto
  */
 @WebServlet("/menu")
 public class MenuServlet extends HttpServlet{
@@ -53,6 +53,9 @@ public class MenuServlet extends HttpServlet{
         else if(eventName.equals("Delete")){
             deleteCourse(splitValueFromInputButton[0], usr);
             response.sendRedirect("menu");
+        }
+        else if (eventName.equals("Reservations")) {
+            response.sendRedirect("reservations");
         }
         else{
             response.sendRedirect("course");

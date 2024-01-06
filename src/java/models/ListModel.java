@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 /**
  *
- * @author André
+ * @author André, Otto
  */
 public class ListModel {
     
@@ -96,4 +96,44 @@ public class ListModel {
                 datetime, String.valueOf(interval), String.valueOf(max_slots));
     }
     
+    public static boolean userHasBookedList(int userID, int listID) {
+        return !runQuery("SELECT * FROM EZQ.RESERVATIONS WHERE USER_ID = ? AND LIST_ID = ?", String.valueOf(userID), String.valueOf(listID)).isEmpty();
+    }
+    
+    public static void addUserToList(int userID, int listID) {
+        if (!userHasBookedList(userID, listID)) {
+            runQuery("INSERT INTO EZQ.RESERVATIONS (LIST_ID, USER_ID) VALUES (?, ?)", String.valueOf(listID), String.valueOf(userID));
+        }
+    }
+    
+    public static void removeUserFromList(int userID, int listID) {
+        if (userHasBookedList(userID, listID)) {
+            runQuery("DELETE FROM EZQ.RESERVATIONS WHERE USER_ID = ? AND LIST_ID = ?", String.valueOf(userID), String.valueOf(listID));
+        }
+    }
+    
+    public static ListModel[] getAllBookedListsForUserOrderedByCourseName(int userID) {
+        QueryResult queryResult = runQuery("SELECT L.START, L.DESCRIPTION, L.LOCATION, L.INTERVAL, L.MAX_SLOTS, L.ID FROM EZQ.LISTS AS L " +
+                                           "INNER JOIN EZQ.RESERVATIONS AS R ON R.LIST_ID = L.ID INNER JOIN EZQ.COURSES AS C ON C.ID = L.COURSE_ID " +
+                                           "WHERE R.USER_ID = ? ORDER BY C.TITEL, L.ID", String.valueOf(userID));
+        int numberOfRows = queryResult.getNumberOfRows();
+        ListModel[] reservations = new ListModel[numberOfRows];
+        
+        for (int i = 0; i < numberOfRows; i++) {
+            Object[] row = queryResult.getRow(i);
+            reservations[i] = new ListModel(row[0].toString(), (String) row[1], (String) row[2], (int) row[3], (int) row[4], (int) row[5]);
+        }
+        return reservations;
+    }
+    
+    public static String[] getAllEmailsFromBookedList(int listID) {
+        QueryResult queryResult = runQuery("SELECT U.EMAIL FROM EZQ.USERS AS U INNER JOIN EZQ.RESERVATIONS AS R ON R.USER_ID = U.ID " +
+                                           "WHERE R.LIST_ID = ?", String.valueOf(listID));
+        int numberOfRows = queryResult.getNumberOfRows();
+        String[] emails = new String[numberOfRows];
+        for (int i = 0; i < numberOfRows; i++) {
+            emails[i] = (String) queryResult.getRow(i)[0];
+        }
+        return emails;
+    }
 }
