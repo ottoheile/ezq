@@ -14,7 +14,7 @@ import models.UserModel;
 
 /**
  *
- * @author André
+ * @author André, Otto
  */
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
@@ -30,9 +30,9 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        
+
         String givenEmail = request.getParameter("email");
-        String givenPassword = request.getParameter("password");
+        String givenPassword = request.getParameter("hashedPassword");
         
         if (UserModel.isValidCredentials(givenEmail, givenPassword)) {
             request.getSession().setAttribute("user", new UserModel(givenEmail, givenPassword));
