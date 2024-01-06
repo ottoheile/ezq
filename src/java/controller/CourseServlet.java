@@ -19,6 +19,7 @@ import static models.ListModel.addUserToList;
 import static models.ListModel.getListsForCourse;
 import static models.ListModel.addListToCourse;
 import static models.ListModel.deleteList;
+import static models.ListModel.getAllEmailsFromBookedList;
 import static models.ListModel.removeUserFromList;
 
 /**
@@ -42,7 +43,6 @@ public class CourseServlet extends HttpServlet {
         ListModel[] lists = getListsForCourse(getIdForCourse((String) request.getSession().getAttribute("courseName"), usr));
         
         request.setAttribute("lists", lists);
-        request.setAttribute("userNotExistsTextHelper", new boolean[lists.length]);
         
         request.getRequestDispatcher("/WEB-INF/jsp/course.jsp").forward(request, response);
     }
@@ -97,6 +97,29 @@ public class CourseServlet extends HttpServlet {
             
             removeUserFromList(userID, Integer.parseInt(splitValueFromInputButton[0]));
             response.sendRedirect("course");
+        }
+        else if (eventName.equals("ListUsers")) {
+            ListModel[] lists = getListsForCourse(getIdForCourse((String) request.getSession().getAttribute("courseName"), usr));
+
+            request.setAttribute("lists", lists);
+            request.setAttribute("emails", getAllEmailsFromBookedList(Integer.parseInt(splitValueFromInputButton[0])));
+            request.setAttribute("listID", splitValueFromInputButton[0]);
+
+            request.getRequestDispatcher("/WEB-INF/jsp/course.jsp").forward(request, response);
+        }
+        else if (eventName.equals("Remove")) {
+            int userID = getIDFromEmail(splitValueFromInputButton[1]);
+            int listID = Integer.parseInt(splitValueFromInputButton[0]);
+            
+            removeUserFromList(userID, listID);
+            
+            ListModel[] lists = getListsForCourse(getIdForCourse((String) request.getSession().getAttribute("courseName"), usr));
+
+            request.setAttribute("lists", lists);
+            request.setAttribute("emails", getAllEmailsFromBookedList(Integer.parseInt(splitValueFromInputButton[0])));
+            request.setAttribute("listID", splitValueFromInputButton[0]);
+
+            request.getRequestDispatcher("/WEB-INF/jsp/course.jsp").forward(request, response);
         }
     }
 }

@@ -125,4 +125,15 @@ public class ListModel {
         }
         return reservations;
     }
+    
+    public static String[] getAllEmailsFromBookedList(int listID) {
+        QueryResult queryResult = runQuery("SELECT U.EMAIL FROM EZQ.USERS AS U INNER JOIN EZQ.RESERVATIONS AS R ON R.USER_ID = U.ID " +
+                                           "WHERE R.LIST_ID = ?", String.valueOf(listID));
+        int numberOfRows = queryResult.getNumberOfRows();
+        String[] emails = new String[numberOfRows];
+        for (int i = 0; i < numberOfRows; i++) {
+            emails[i] = (String) queryResult.getRow(i)[0];
+        }
+        return emails;
+    }
 }
