@@ -1,10 +1,10 @@
 <%-- 
     Document   : course
     Created on : 23 Dec 2023, 23:11:18
-    Author     : André
+    Author     : André, Otto
 --%>
 
-<%@ page import="models.ListModel" %>
+<%@ page import="models.ListModel, models.UserModel" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -71,7 +71,7 @@
             left: 50%;
             transform: translateX(-50%);
         }
-        #popup {
+        .popup {
             display: none;
             position: fixed;
             top: 50%;
@@ -84,23 +84,23 @@
             z-index: 1000;
             border-radius: 10px 1px;
         }
-        #popup form button{
+        .popup form button{
             width: 100%;
             box-sizing: border-box;
         }
-        #popup #title{
+        .popup #title{
             margin-bottom: 10px;
         }
-        #popupform label{
+        .popupform label{
             text-align: right;
             margin: 10px;
         }
-        #popupForm {
+        .popupForm {
             display: grid;
             gap: 5px;
             grid-template-columns: 1fr 1fr;
         }
-        #popupForm input {
+        .popupForm input {
             width: 100%;
             box-sizing: border-box;
         }
@@ -142,6 +142,12 @@
             right: 15px;
             border-radius: 10px 1px;
         }
+        #popupUsers {
+            display: block;
+        }
+        #popupUsersForm {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -152,21 +158,48 @@
     
     <div class="container">
         <% ListModel[] lists = ((ListModel[]) request.getAttribute("lists"));
-        for (int i = 0; i < lists.length; i++) { %>
-            <% if (!(lists[i].slotsLeft() == 0)) { %>
+        UserModel user = (UserModel) request.getSession().getAttribute("user");
+        boolean isAdmin = (boolean) request.getSession().getAttribute("admin");
+        
+        for (int i = 0; i < lists.length; i++) {
+            boolean userHasBooking = lists[i].userHasBookedList(user.getId(), lists[i].getId());
+            if ((lists[i].slotsLeft() > 0) || userHasBooking || isAdmin) { %>
                 <div class="item">
-                    <form action="course" method="post">
+                    <form action="course" method="post" id="bookingForm<%=i%>">
                         <label><%= lists[i].getStartTime() %> </label><br>
                         <p><%= lists[i].getDescription() %></p>
                         <p>Location: <%= lists[i].getLocation() %></p>
                         <p>Slots left: <%= lists[i].slotsLeft() %></p>
-                        <input type="submit" name="list" value="Book <%= lists[i].getStartTime() %>">
+                        <% if (isAdmin) {
+                            boolean[] userNotExistsTextHelper = (boolean[]) request.getAttribute("userNotExistsTextHelper");
+                            if (userNotExistsTextHelper != null && userNotExistsTextHelper[i]) { %>
+                                <p>User does not exist.</p>
+                            <% } %>
+                            <label for="inputField">User email:</label>
+                            <input type="text" id="userBooked" name="userBooked<%=i%>">
+                        <% } %>
+                        <input type="hidden" name="list" value="<%= lists[i].getId() %> <%= userHasBooking && !isAdmin ? "Cancel" : "Book" %>">
+                        <% if (!userHasBooking || isAdmin) { %>
+                            <% if (lists[i].slotsLeft() > 0) { %>
+                                <button type="submit">Book slot</button>
+                            <% } else { %>
+                                <button disabled>Book slot</button>
+                            <% } %>
+                        <% } else { %>
+                            <button type="submit">Cancel reservation</button>
+                        <% } %>
+                        <input type="hidden" name="formIndex" value="<%=i%>"/>
                     </form>
                     <% if ((boolean) request.getSession().getAttribute("admin")) { %>
+                    <form action="course" method="post">
+                        <br>
+                        <input type="hidden" name="list" value="<%= lists[i].getId() %> ListUsers">
+                        <button type="submit">List booked users</button>
+                    </form>
                     <form action="course" method="post" id="deleteForm">
                         <br>
                         <input type="hidden" name="list" value="<%= lists[i].getId() %> Delete">
-                        <button type="button" onclick="confirmDelete()">Delete</button>
+                        <button type="button" onclick="confirmDelete()">Delete list</button>
                     </form>
                     <% } %>
                 </div>
@@ -175,13 +208,32 @@
         <% if ((boolean) request.getSession().getAttribute("admin")) { %>
         <div class="item">
             <label>Add List</label><br>
-            <button type="button" onclick="showPopup()">Add</button>
+            <button type="button" onclick="showPopup('popupAdd')">Add</button>
         </div>
         <% } %>
         
-        <div id="popup">
+        <% String[] emails = (String[]) request.getAttribute("emails");
+        String listID = (String) request.getAttribute("listID");
+        if (emails != null && listID != null) { %>
+            <div class="popup" id="popupUsers">
+                <h2>Booked Users</h2>
+                <% if (emails.length == 0) { %>
+                    <h3>No users found</h3>
+                <% } %>
+                <% for (int i = 0; i < emails.length; i++) {%>
+                    <form class="popupForm" id="popupUsersForm" action="course" method="post">
+                        <label for="inputField"><%= emails[i] %></label>
+                        <input type="hidden" name="list" value="<%= listID %> <%= emails[i] %> Remove">
+                        <button type="submit">Remove</button>
+                    </form>
+                <% } %>    
+                <button type="button" onclick="closePopup('popupUsers')">Close</button>
+            </div>
+        <% } %>
+        
+        <div class="popup" id="popupAdd">
                 <h2>Add List</h2>
-                <form id="popupForm" action="course" method="post">
+                <form class="popupForm" action="course" method="post">
                   <!-- Your input fields go here -->
                   <label for="inputField">Start time:</label>
                   <input type="datetime-local" id="datetime" name="datetime" required>
@@ -194,7 +246,7 @@
                   <label for="inputField">Description:</label>
                   <input type="text" id="description" name="description" required>
                   <input id="addButton" type="submit" name="list" value="Add">
-                  <button onclick="closePopup()">Close</button>
+                  <button onclick="closePopup('popupAdd')">Close</button>
                 </form>
         </div>
         <div id="popupAdd">
@@ -224,13 +276,13 @@
             window.location.href = newUrl;
         });
         // Function to show the popup
-        function showPopup() {
-          document.getElementById('popup').style.display = 'block';
+        function showPopup(popupName) {
+          document.getElementById(popupName).style.display = 'block';
         }
 
         // Function to close the popup
-        function closePopup() {
-          document.getElementById('popup').style.display = 'none';
+        function closePopup(popupName) {
+          document.getElementById(popupName).style.display = 'none';
         }
         
         function showPopupAdd() {

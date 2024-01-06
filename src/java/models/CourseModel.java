@@ -10,7 +10,7 @@ import static models.ListModel.deleteAllListsForCourse;
 
 /**
  *
- * @author André
+ * @author André, Otto
  */
 public class CourseModel {
     private final String name;
@@ -40,6 +40,15 @@ public class CourseModel {
             }
         } 
         return -1;
+    }
+    
+    public static String getCourseNameFromListID(int listID) {
+        QueryResult queryResult = runQuery("SELECT C.TITEL FROM EZQ.COURSES AS C INNER JOIN EZQ.LISTS AS L ON " +
+                                           "L.COURSE_ID = C.ID WHERE L.ID = ?", String.valueOf(listID));
+        if (queryResult.isEmpty())
+            return "";
+        
+        return (String) queryResult.getRow(0)[0];
     }
     
     public static void createNewCourse(String titel, int admin_id){

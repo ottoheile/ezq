@@ -9,7 +9,7 @@ import util.DBHandler.QueryResult;
 
 /**
  *
- * @author André
+ * @author André, Otto
  */
 public class UserModel {
     private final String email;
@@ -20,7 +20,7 @@ public class UserModel {
         QueryResult queryResult = runQuery("SELECT ID FROM EZQ.USERS WHERE EMAIL = ?", email);
         this.id = (int) queryResult.getRow(0)[0];
         this.email = email;
-        this.admin = getAdminStatus();
+        this.admin = UserModel.getAdminStatus(email);
     }
     
     public String getEmail(){
@@ -39,10 +39,20 @@ public class UserModel {
         return !runQuery("SELECT ID FROM EZQ.USERS WHERE EMAIL = ? AND PASSWORD = ?", email, password).isEmpty();
     }
     
-    private boolean getAdminStatus(){
+    public static boolean exists(String email) {
+        return (boolean) !runQuery("SELECT ID FROM EZQ.USERS WHERE EMAIL = ?", email).isEmpty();
+    }
+    
+    public static boolean getAdminStatus(String email){
         QueryResult qr = runQuery("SELECT ADMIN FROM EZQ.USERS WHERE EMAIL = ?", email);
         
         return (boolean) qr.getRow(0)[0];
+    }
+    
+    public static int getIDFromEmail(String email) {
+        if (exists(email))
+            return (int) runQuery("SELECT ID FROM EZQ.USERS WHERE EMAIL = ?", email).getRow(0)[0];
+        return -1;
     }
     
     public CourseModel[] getAssignedCourses(){
