@@ -85,8 +85,12 @@
             border-radius: 10px 1px;
         }
         .popup form button{
-            width: 100%;
             box-sizing: border-box;
+        }
+        .popup form #popupAddUserButton{
+            margin-top: 10px;
+            position: absolute;
+            right: 20px;
         }
         .popup #title{
             margin-bottom: 10px;
@@ -153,7 +157,7 @@
 <body>
     <h2> Course <%= (String) request.getSession().getAttribute("courseName")%></h2>
     <% if ((boolean) request.getSession().getAttribute("admin")) { %>
-    <button id="addUserButton" onclick="showPopupAdd()">Add user</button>
+    <button id="addUserButton" onclick="showPopup('popupAddUser')">Add user</button>
     <% } %>
     
     <div class="container">
@@ -208,7 +212,7 @@
         <% if ((boolean) request.getSession().getAttribute("admin")) { %>
         <div class="item">
             <label>Add List</label><br>
-            <button type="button" onclick="showPopup('popupAdd')">Add</button>
+            <button type="button" onclick="showPopup('popupAddList')">Add</button>
         </div>
         <% } %>
         
@@ -231,7 +235,7 @@
             </div>
         <% } %>
         
-        <div class="popup" id="popupAdd">
+        <div class="popup" id="popupAddList">
                 <h2>Add List</h2>
                 <form class="popupForm" action="course" method="post">
                   <!-- Your input fields go here -->
@@ -246,17 +250,17 @@
                   <label for="inputField">Description:</label>
                   <input type="text" id="description" name="description" required>
                   <input id="addButton" type="submit" name="list" value="Add">
-                  <button onclick="closePopup('popupAdd')">Close</button>
+                  <button onclick="closePopup('popupAddList')">Close</button>
                 </form>
         </div>
-        <div id="popupAdd">
+        <div class=popup id="popupAddUser">
             <h2>Add User</h2>
             <form action="course" method="post">
               <!-- Your input fields go here -->
               <label for="inputField">Username/email:</label>
               <input type="text" name="username" required><br>
               <input type="submit" id="submitInputAddUser" name="list" value="Add user">
-              <button onclick="closePopupAdd()">Close</button>
+              <button id="popupAddUserButton" onclick="closePopup('popupAddUser')">Close</button>
             </form>
         </div>
     </div>
@@ -284,22 +288,12 @@
         function closePopup(popupName) {
           document.getElementById(popupName).style.display = 'none';
         }
-        
-        function showPopupAdd() {
-          document.getElementById('popupAdd').style.display = 'block';
-        }
-
-        // Function to close the popup
-        function closePopupAdd() {
-          document.getElementById('popupAdd').style.display = 'none';
-        }
 
         // Function to handle confirmation (you can modify this based on your needs)
         function confirmPopup() {
           // Add your logic here to handle form data or perform any other actions
           alert('Form submitted successfully!');
           closePopup(); // Close the popup after processing
-          closePopupAdd();
         }
         function confirmDelete() {
                 // Display a confirmation dialog

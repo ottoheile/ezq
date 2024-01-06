@@ -19,13 +19,10 @@ import static models.ListModel.addUserToList;
 import static models.ListModel.getListsForCourse;
 import static models.ListModel.addListToCourse;
 import static models.ListModel.deleteList;
-<<<<<<< HEAD
 import static models.CourseModel.addUserToCourse;
 import static models.UserModel.getIdFromUsername;
-=======
 import static models.ListModel.getAllEmailsFromBookedList;
 import static models.ListModel.removeUserFromList;
->>>>>>> a0c263bddbb3340c9c15e2d3c3151810f3c57660
 
 /**
  *
@@ -74,7 +71,6 @@ public class CourseServlet extends HttpServlet {
             deleteList(Integer.parseInt(splitValueFromInputButton[0]));
             response.sendRedirect("course");
         }
-<<<<<<< HEAD
         else if(eventName.equals("user")){
             String userToAdd = request.getParameter("username");
             int userToAddId = getIdFromUsername(userToAdd);
@@ -86,8 +82,6 @@ public class CourseServlet extends HttpServlet {
                 response.sendRedirect("course");
             }
         }
-        
-=======
         else if (eventName.equals("Book")) {
             int userID = usr.getId();
             int formIndex = Integer.parseInt(request.getParameter("formIndex"));
@@ -140,6 +134,5 @@ public class CourseServlet extends HttpServlet {
 
             request.getRequestDispatcher("/WEB-INF/jsp/course.jsp").forward(request, response);
         }
->>>>>>> a0c263bddbb3340c9c15e2d3c3151810f3c57660
     }
 }
