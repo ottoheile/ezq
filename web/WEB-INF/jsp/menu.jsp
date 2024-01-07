@@ -56,7 +56,7 @@
             margin-bottom: 5px;
             border-radius: 10px 1px;
         }
-        #popup {
+        .popup {
             display: none;
             position: fixed;
             top: 50%;
@@ -69,11 +69,11 @@
             z-index: 1000;
             border-radius: 10px 1px;
         }
-        #popup form button{
+        .popup form button{
             position: absolute;
             right: 20px;
         }
-        #popup #title{
+        .popup #title{
             margin-bottom: 10px;
         }
         #logout {
@@ -89,11 +89,26 @@
             left: 50%;
             transform: translateX(-50%);
         }
+        #createUserButton{
+            position: absolute;
+            top: 49px;
+            right: 15px;
+            border-radius: 10px 1px;
+        }
+        <% if (request.getAttribute("inviteSent") != null) { %>
+        #popupCreateUser {
+            display: block;
+        }
+        <% } %>
         
     </style>
 </head>
     <body>
         <h2>Welcome <%= ((String) request.getSession().getAttribute("email")).split("@")[0] %></h2>
+        <% if ((boolean) request.getSession().getAttribute("admin")) { %>
+            <button id="createUserButton" onclick="showPopup('popupCreateUser')">Create user</button>
+        <% } %>
+        
         <div class="container">
             <% CourseModel[] courses = ((CourseModel[]) request.getAttribute("courses"));
             for (int i = 0; i < courses.length; i++) { %>
@@ -114,7 +129,7 @@
             <% if ((boolean) request.getSession().getAttribute("admin")) { %>
             <div class="item">
                         <label>Add course</label><br>
-                        <button onclick="showPopup()">Add</button>
+                        <button onclick="showPopup('popupAddCourse')">Add</button>
             </div>
             <% } else {%>
                 <div class="item">
@@ -125,16 +140,36 @@
                 </div>
             <% } %>
 
-            <div id="popup">
+            <div class="popup" id="popupAddCourse">
                 <h2>Add Course</h2>
-                <form id="popupForm" action="menu" method="post">
+                <form class="popupForm" action="menu" method="post">
                   <!-- Your input fields go here -->
                   <label for="inputField">Title:</label>
                   <input type="text" id="title" name="title" required><br>
                   <input type="submit" id="add" name="course" value="Add">
-                  <button onclick="closePopup()">Close</button>
+                  <button onclick="closePopup('popupAddCourse')">Close</button>
                 </form>
             </div>
+        </div>
+        <div class="popup" id="popupCreateUser">
+            <h2>Create New User</h2>
+            <form action="menu" method="post">
+                <% if(request.getAttribute("inviteSent") != null) { %>
+                    <% if((boolean) request.getAttribute("inviteSent")) { %>
+                        <h3 id="inviteSent">Invite sent!</h3>
+                    <% } else { %>
+                        <h3 id="inviteSent">User already exists!</h3>
+                    <% } %>
+                <% } else { %>
+                    <h3 id="inviteSent"></h3>
+                <% } %>
+                <label for="inputField">Email:</label>
+                <input type="text" id="email" name="email" required><br>
+                <label for="adminCheckbox">Admin:</label>
+                <input type="checkbox" id="adminCheckbox" name="adminCheckbox"><br>
+                <input type="submit" id="submitInputCreateUser" name="course" value="Send invite">
+                <button type="button" onclick="closeCreateUserPopup()">Close</button>
+            </form>
         </div>
 
         <form  id="logoutForm" action="menu" method="post">
@@ -143,13 +178,20 @@
         </form>
         <script>
             // Function to show the popup
-            function showPopup() {
-              document.getElementById('popup').style.display = 'block';
+            function showPopup(popupName) {
+              document.getElementById(popupName).style.display = 'block';
             }
 
             // Function to close the popup
-            function closePopup() {
-              document.getElementById('popup').style.display = 'none';
+            function closePopup(popupName) {
+              document.getElementById(popupName).style.display = 'none';
+            }
+            
+            function closeCreateUserPopup() {
+                document.getElementById("inviteSent").style.display = "none";
+                document.getElementById("email").value = "";
+                document.getElementById("adminCheckbox").checked = false;
+                closePopup("popupCreateUser");
             }
 
             // Function to handle confirmation (you can modify this based on your needs)
