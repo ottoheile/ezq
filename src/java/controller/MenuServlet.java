@@ -5,6 +5,7 @@
 package controller;
 
 import java.io.IOException;
+import java.util.Properties;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -12,8 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import models.UserModel;
 import static models.CourseModel.createNewCourse;;
+import static models.UserModel.exists;
 import static models.CourseModel.deleteCourse;
-
+import util.SendEmail;
+import static models.UserModel.createUserInvite;
 
 /**
  *
@@ -56,6 +59,34 @@ public class MenuServlet extends HttpServlet{
         }
         else if (eventName.equals("Reservations")) {
             response.sendRedirect("reservations");
+        }
+        else if (eventName.equals("invite")) {
+            String email = request.getParameter("email");
+            boolean inviteSent = false;
+            
+            if (!exists(email)) {
+                boolean admin = request.getParameter("adminCheckbox") != null;
+                
+                String token = createUserInvite(email, admin);
+
+                if (token != null) {
+                    Properties properties = new Properties();
+                    properties.load(SendEmail.class.getClassLoader().getResourceAsStream("conf/credentials/email.properties"));
+                    String websiteURL = properties.getProperty("website-url");
+
+                    SendEmail.sendEmail(email, "Get started with EzQ", "Get started with EzQ by setting a password for your account:\n\n" +
+                                        websiteURL + "/register?token=" + token + "\n\n" + 
+                                        "This email was automatically generated as an EzQ admin has created an account for you.\n\n" +
+                                        "If you believe this is an error, please ignore this email.");
+                }
+                inviteSent = true;
+            }
+            
+            request.setAttribute("inviteSent", inviteSent);
+            request.setAttribute("courses", usr.getAssignedCourses());
+            request.getSession().setAttribute("admin", usr.isAdmin());
+        
+            request.getRequestDispatcher("/WEB-INF/jsp/menu.jsp").forward(request, response);
         }
         else{
             response.sendRedirect("course");

@@ -6,6 +6,7 @@ package models;
 
 import static util.DBHandler.runQuery;
 import util.DBHandler.QueryResult;
+import static util.TokenGenerator.generateToken;
 
 /**
  *
@@ -79,5 +80,50 @@ public class UserModel {
             return -1;
         }
         return (int) qr.getRow(0)[0];
+    }
+    
+    public static void createUser(String email, String password, boolean admin) {
+        runQuery("INSERT INTO EZQ.USERS (EMAIL, PASSWORD, ADMIN) VALUES (?, ?, ?)", email, password, String.valueOf(admin));
+    }
+    
+    public static boolean userInviteTokenExists(String token) {
+        return !runQuery("SELECT * FROM EZQ.INVITED_USERS WHERE TOKEN = ?", token).isEmpty();
+    }
+    
+    public static String getEmailFromInviteToken(String token) {
+        QueryResult queryResult = runQuery("SELECT EMAIL FROM EZQ.INVITED_USERS WHERE TOKEN = ?", token);
+        
+        if (queryResult.isEmpty()) {
+            return null;
+        }
+        
+        return (String) queryResult.getRow(0)[0];
+    }
+    
+    public static boolean getAdminStatusFromInviteToken(String token) {
+        QueryResult queryResult = runQuery("SELECT ADMIN FROM EZQ.INVITED_USERS WHERE TOKEN = ?", token);
+        
+        if (queryResult.isEmpty()) {
+            return false;
+        }
+        
+        return (boolean) queryResult.getRow(0)[0];
+    }
+    
+    public static String createUserInvite(String email, boolean admin) {
+        String token = null;
+        while (true) {
+            token = generateToken();
+            
+            if (!userInviteTokenExists(token)) {
+                break;
+            }
+        }
+        runQuery("INSERT INTO EZQ.INVITED_USERS (EMAIL, ADMIN, TOKEN) VALUES (?, ?, ?)", email, String.valueOf(admin), token);
+        return token;
+    }
+    
+    public static void deleteUserInvite(String email) {
+        runQuery("DELETE FROM EZQ.INVITED_USERS WHERE EMAIL = ?", email);
     }
 }

@@ -50,14 +50,13 @@ public class DBHandler {
         try {
             Class.forName("org.apache.derby.jdbc.ClientDriver");
                         
-//            Properties properties = new Properties();
-//            properties.load(DBHandler.class.getClassLoader().getResourceAsStream("conf/credentials/db.properties"));
-//            String url = properties.getProperty("url");
-//            String username = properties.getProperty("username");
-//            String password = properties.getProperty("password");
-            
-            connection = DriverManager.getConnection("jdbc:derby://localhost:1527/ezq", "dbscript", "password");
-//            connection = DriverManager.getConnection(url, username, password);
+            Properties properties = new Properties();
+            properties.load(DBHandler.class.getClassLoader().getResourceAsStream("conf/credentials/db.properties"));
+            String url = properties.getProperty("url");
+            String username = properties.getProperty("username");
+            String password = properties.getProperty("password");
+            connection = DriverManager.getConnection(url, username, password);
+//            connection = DriverManager.getConnection("jdbc:derby://localhost:1527/ezq", "dbscript", "password");
             
             statement = connection.prepareStatement(query);
             if (params.length > 0) {

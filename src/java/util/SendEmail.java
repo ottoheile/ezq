@@ -1,13 +1,8 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package util;
 
 import java.util.Properties;
 
 import javax.mail.Message;
-import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -15,47 +10,42 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 public class SendEmail {
-    
-    public static void send(String playerEmail, String subject, String body){
-      String to = playerEmail;
+    public static void sendEmail(String toEmail, String subject, String body) {
+        try {
+            Properties properties = new Properties();
+            properties.load(SendEmail.class.getClassLoader().getResourceAsStream("conf/credentials/email.properties"));
+            String mailServer = properties.getProperty("mail-server");
+            String fromEmail = properties.getProperty("email");
+            String password = properties.getProperty("password");
+            boolean authWithDomain = Boolean.parseBoolean(properties.getProperty("auth-with-domain"));
 
-      String from = playerEmail;
-      final String username = playerEmail.split("@")[0];
-      final String password = "*******";// CHANGE ACCORDINGLY 
+            Properties props = new Properties();
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.host", mailServer);
+            props.put("mail.smtp.port", "587");
 
-      String host = "smtp.kth.se";
+            Session session = Session.getInstance(props,
+                new javax.mail.Authenticator() {
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(authWithDomain ? fromEmail : fromEmail.split("@")[0], password);
+                    }
+                });
 
-      Properties props = new Properties();
-      props.put("mail.smtp.auth", "true");
-      props.put("mail.smtp.starttls.enable", "true");
-      props.put("mail.smtp.host", host);
-      props.put("mail.smtp.port", "587");
+            Message message = new MimeMessage(session);
 
-      Session session = Session.getInstance(props,
-         new javax.mail.Authenticator() {
-            protected PasswordAuthentication getPasswordAuthentication() {
-               return new PasswordAuthentication(username, password);
-	   }
-         });
+            message.setFrom(new InternetAddress(fromEmail));
 
-      try {
-	   Message message = new MimeMessage(session);
-	
-	   message.setFrom(new InternetAddress(from));
-	
-	   message.setRecipients(Message.RecipientType.TO,
-               InternetAddress.parse(to));
-	
-	   message.setSubject(subject);
-	
-	   message.setText(body);
+            message.setRecipients(Message.RecipientType.TO,
+                InternetAddress.parse(toEmail));
 
-	   Transport.send(message);
+            message.setSubject(subject);
 
-	   System.out.println("Sent message successfully....");
+            message.setText(body);
 
-      } catch (MessagingException e) {
-         throw new RuntimeException(e);
-      }
+            Transport.send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
