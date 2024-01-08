@@ -61,6 +61,17 @@ public class ListModel {
         return max_slots - qr.getNumberOfRows();
     }
     
+    public static ListModel getListFromID(int listID) {
+        QueryResult queryResult = runQuery("SELECT START, DESCRIPTION, LOCATION, INTERVAL, MAX_SLOTS FROM EZQ.LISTS WHERE ID = ?", String.valueOf(listID));
+        
+        if (queryResult.isEmpty()) {
+            return null;
+        }
+        
+        Object[] result = queryResult.getRow(0);
+        return new ListModel(result[0].toString(), (String) result[1], (String) result[2], (int) result[3], (int) result[4], listID);
+    }
+    
     public static ListModel[] getListsForCourse(int course_id){
         QueryResult qr = runQuery("SELECT START, DESCRIPTION, LOCATION, INTERVAL, MAX_SLOTS, ID FROM EZQ.LISTS WHERE COURSE_ID = ?", String.valueOf(course_id));
         

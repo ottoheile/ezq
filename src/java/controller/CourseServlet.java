@@ -5,6 +5,7 @@
 package controller;
 
 import java.io.IOException;
+import java.util.Properties;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -22,7 +23,9 @@ import static models.ListModel.deleteList;
 import static models.CourseModel.addUserToCourse;
 import static models.UserModel.getIdFromUsername;
 import static models.ListModel.getAllEmailsFromBookedList;
+import static models.ListModel.getListFromID;
 import static models.ListModel.removeUserFromList;
+import util.SendEmail;
 
 /**
  *
@@ -84,12 +87,14 @@ public class CourseServlet extends HttpServlet {
         }
         else if (eventName.equals("Book")) {
             int userID = usr.getId();
+            String email = usr.getEmail();
             int formIndex = Integer.parseInt(request.getParameter("formIndex"));
+            String courseName = (String) request.getSession().getAttribute("courseName");
             
             if (usr.isAdmin()) {
-                String user = request.getParameter("userBooked" + formIndex);
-                if (!exists(user)) {
-                    ListModel[] lists = getListsForCourse(getIdForCourse((String) request.getSession().getAttribute("courseName"), usr));
+                email = request.getParameter("userBooked" + formIndex);
+                if (!exists(email)) {
+                    ListModel[] lists = getListsForCourse(getIdForCourse(courseName, usr));
                     boolean[] userNotExistsTextHelper = new boolean[lists.length];
                     userNotExistsTextHelper[formIndex] = true;
                     
@@ -99,9 +104,31 @@ public class CourseServlet extends HttpServlet {
                     
                     return;
                 }
-                userID = getIDFromEmail(user);
+                userID = getIDFromEmail(email);
             }
-            addUserToList(userID, Integer.parseInt(splitValueFromInputButton[0]));
+            int listID = Integer.parseInt(splitValueFromInputButton[0]);
+            ListModel list = getListFromID(listID);
+            
+            if (list == null) {
+                return;
+            }
+            
+            addUserToList(userID, listID);
+            
+            Properties properties = new Properties();
+            properties.load(SendEmail.class.getClassLoader().getResourceAsStream("conf/credentials/email.properties"));
+            String websiteURL = properties.getProperty("website-url");
+            
+            SendEmail.sendEmail(email, "EzQ time slot booking confirmation", 
+                                "Below is a confirmation of your reserved time slot for the course " + courseName + ":\n\n" +
+                                "Description: " + list.getDescription() + "\n" +
+                                "When: " + list.getStartTime() + "\n" +
+                                "Where: " + list.getLocation() + "\n" + 
+                                "\n" +
+                                "You can find this and other reservations below.\n\n" +
+                                websiteURL + "/reservations\n\n" +
+                                "This email can not be responeded to.");
+            
             response.sendRedirect("course");
         }
         else if (eventName.equals("Cancel")) {
