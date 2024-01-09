@@ -115,11 +115,13 @@
                 <div class="item">
                     <form action="menu" method="post">
                         <label><%= courses[i].getName() %> </label><br>
+                        <input type="hidden" name="courseName" value="<%= courses[i].getName() %>">
                         <input type="submit" name="course" value="Show available lists for <%= courses[i].getName() %>">
                     </form>
                     <% if ((boolean) request.getSession().getAttribute("admin")) { %>
                     <form action="menu" method="post" id="deleteForm<%= courses[i].getName() %>">
                         <br>
+                        <input type="hidden" name="courseName" value="<%= courses[i].getName() %>">
                         <input type="hidden" name="course" value="<%= courses[i].getName() %> Delete">
                         <button type="button" onclick="confirmDelete('<%= courses[i].getName() %>')">Delete</button>
                     </form>

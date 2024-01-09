@@ -43,7 +43,7 @@ public class MenuServlet extends HttpServlet{
         String eventName = splitValueFromInputButton[splitValueFromInputButton.length - 1];
         UserModel usr = (UserModel) request.getSession().getAttribute("user");
         
-        request.getSession().setAttribute("courseName", eventName);
+        request.getSession().setAttribute("courseName", request.getParameter("courseName"));
         if (eventName.equals("Add")){
             String newCourseTitel = request.getParameter("title");
             createNewCourse(newCourseTitel, usr.getId());
@@ -54,7 +54,7 @@ public class MenuServlet extends HttpServlet{
             response.sendRedirect("login");
         }
         else if(eventName.equals("Delete")){
-            deleteCourse(splitValueFromInputButton[0], usr);
+            deleteCourse(request.getParameter("courseName"), usr);
             response.sendRedirect("menu");
         }
         else if (eventName.equals("Reservations")) {
