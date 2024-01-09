@@ -66,7 +66,7 @@ public class UserModel {
         CourseModel[] courses = new CourseModel[queryResult1.getNumberOfRows()];
         
         for (int i = 0; i < queryResult1.getNumberOfRows(); i++){
-            QueryResult queryResult2 = runQuery("SELECT TITEL FROM EZQ.COURSES WHERE ID = ?", String.valueOf(queryResult1.getRow(i)[0]));
+            QueryResult queryResult2 = runQuery("SELECT TITLE FROM EZQ.COURSES WHERE ID = ?", String.valueOf(queryResult1.getRow(i)[0]));
             Object row[] = queryResult2.getRow(0);
             courses[i] = new CourseModel(row[0].toString());   
         }

@@ -89,15 +89,10 @@ public class ListModel {
     
     public static void deleteList(int list_id){
         runQuery("DELETE FROM EZQ.LISTS WHERE ID = ?", String.valueOf(list_id));
-        deleteListFromReservations(list_id);
     }
     
     public static void deleteAllListsForCourse(int course_id ){
-        QueryResult qr = runQuery("SELECT ID FROM EZQ.LISTS WHERE COURSE_ID = ?", String.valueOf(course_id));
         runQuery("DELETE FROM EZQ.LISTS WHERE COURSE_ID = ?", String.valueOf(course_id));
-        for (int i = 0; i < qr.getNumberOfRows(); i++){
-            deleteListFromReservations((int) qr.getRow(i)[0]);
-        }
     }
     
     public static void addListToCourse (int max_slots, int interval, String datetime, String location, String desc, int course_id, int user_id){
@@ -126,7 +121,7 @@ public class ListModel {
     public static ListModel[] getAllBookedListsForUserOrderedByCourseName(int userID) {
         QueryResult queryResult = runQuery("SELECT L.START, L.DESCRIPTION, L.LOCATION, L.INTERVAL, L.MAX_SLOTS, L.ID FROM EZQ.LISTS AS L " +
                                            "INNER JOIN EZQ.RESERVATIONS AS R ON R.LIST_ID = L.ID INNER JOIN EZQ.COURSES AS C ON C.ID = L.COURSE_ID " +
-                                           "WHERE R.USER_ID = ? ORDER BY C.TITEL, L.ID", String.valueOf(userID));
+                                           "WHERE R.USER_ID = ? ORDER BY C.TITLE, L.ID", String.valueOf(userID));
         int numberOfRows = queryResult.getNumberOfRows();
         ListModel[] reservations = new ListModel[numberOfRows];
         
