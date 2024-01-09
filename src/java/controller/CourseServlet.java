@@ -25,6 +25,7 @@ import static models.UserModel.getIdFromUsername;
 import static models.ListModel.getAllEmailsFromBookedList;
 import static models.ListModel.getListFromID;
 import static models.ListModel.removeUserFromList;
+import static models.ListModel.userHasBookedList;
 import util.SendEmail;
 
 /**
@@ -107,6 +108,12 @@ public class CourseServlet extends HttpServlet {
                 userID = getIDFromEmail(email);
             }
             int listID = Integer.parseInt(splitValueFromInputButton[0]);
+            
+            if (userHasBookedList(userID, listID)) {
+                response.sendRedirect("course");
+                return;
+            }
+            
             ListModel list = getListFromID(listID);
             
             if (list == null) {
