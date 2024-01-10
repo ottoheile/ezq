@@ -119,7 +119,12 @@ public class UserModel {
                 break;
             }
         }
-        runQuery("INSERT INTO EZQ.INVITED_USERS (EMAIL, ADMIN, TOKEN) VALUES (?, ?, ?)", email, String.valueOf(admin), token);
+        QueryResult queryResult = runQuery("SELECT * FROM EZQ.INVITED_USERS WHERE EMAIL = ?", email);
+        if (queryResult.isEmpty()) {
+            runQuery("INSERT INTO EZQ.INVITED_USERS (EMAIL, ADMIN, TOKEN) VALUES (?, ?, ?)", email, String.valueOf(admin), token);
+        } else {
+            runQuery("UPDATE EZQ.INVITED_USERS SET ADMIN = ?, TOKEN = ? WHERE EMAIL = ?", String.valueOf(admin), token, email);
+        }
         return token;
     }
     
